@@ -1,0 +1,41 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "My Todo List";
+}
+
+<div class="todo-wrapper">
+    <h1 class="todo-heading">My Todo List</h1>
+
+    <form method="post" asp-page-handler="Add" class="todo-add-form">
+        <input asp-for="NewTitle" class="todo-input" placeholder="What needs to be done?" autocomplete="off" autofocus />
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+    <span asp-validation-for="NewTitle" class="text-danger"></span>
+
+    @if (Model.TodoItems.Count == 0)
+    {
+        <p class="todo-empty">No tasks yet. Add one above to get started!</p>
+    }
+    else
+    {
+        <ul class="todo-list">
+            @foreach (var item in Model.TodoItems)
+            {
+                <li class="todo-item @(item.IsComplete ? "todo-item-complete" : "")">
+                    <form method="post" asp-page-handler="Toggle" asp-route-id="@item.Id" class="todo-toggle-form">
+                        <button type="submit" class="todo-checkbox" aria-label="Toggle complete">
+                            @(item.IsComplete ? "✔" : "")
+                        </button>
+                    </form>
+                    <span class="todo-title">@item.Title</span>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" class="todo-delete-form">
+                        <button type="submit" class="todo-delete" aria-label="Delete task">✕</button>
+                    </form>
+                </li>
+            }
+        </ul>
+
+        <p class="todo-summary">@Model.RemainingCount task(s) remaining</p>
+    }
+</div>
