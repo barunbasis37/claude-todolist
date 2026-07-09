@@ -10,4 +10,6 @@ public class TodoContext : DbContext
     }
 
     public DbSet<TodoItem> TodoItems => Set<TodoItem>();
+
+    public DbSet<Feedback> Feedbacks => Set<Feedback>();
 }

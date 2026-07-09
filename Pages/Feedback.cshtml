@@ -1,0 +1,65 @@
+@page
+@model FeedbackModel
+@{
+    ViewData["Title"] = "Feedback";
+    var isEditing = Model.EditingId.HasValue;
+}
+
+<div class="feedback-wrapper">
+    <h1 class="feedback-heading">Feedback</h1>
+
+    <form method="post" asp-page-handler="@(isEditing ? "Update" : "Add")" asp-route-id="@Model.EditingId" class="feedback-form">
+        <input asp-for="Name" class="feedback-input" placeholder="Your name" autocomplete="off" />
+        <textarea asp-for="Message" class="feedback-textarea" placeholder="Your feedback" rows="3"></textarea>
+
+        <div class="feedback-rating-row">
+            <label for="Rating">Rating</label>
+            <select asp-for="Rating" class="feedback-rating-select">
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Good</option>
+                <option value="3">3 - Average</option>
+                <option value="2">2 - Poor</option>
+                <option value="1">1 - Very Poor</option>
+            </select>
+        </div>
+
+        <div class="feedback-form-actions">
+            <button type="submit" class="btn btn-primary">@(isEditing ? "Save Changes" : "Submit Feedback")</button>
+            @if (isEditing)
+            {
+                <a asp-page="/Feedback" class="btn btn-secondary">Cancel</a>
+            }
+        </div>
+    </form>
+    <span asp-validation-for="Name" class="text-danger"></span>
+    <span asp-validation-for="Message" class="text-danger"></span>
+
+    @if (Model.Feedbacks.Count == 0)
+    {
+        <p class="feedback-empty">No feedback yet. Be the first to share your thoughts!</p>
+    }
+    else
+    {
+        <ul class="feedback-list">
+            @foreach (var item in Model.Feedbacks)
+            {
+                <li class="feedback-item">
+                    <div class="feedback-item-header">
+                        <span class="feedback-name">@item.Name</span>
+                        <span class="feedback-stars">@(new string('★', item.Rating))@(new string('☆', 5 - item.Rating))</span>
+                    </div>
+                    <p class="feedback-message">@item.Message</p>
+                    <div class="feedback-item-footer">
+                        <span class="feedback-date">@item.CreatedAt.ToString("MMM d, yyyy h:mm tt")</span>
+                        <div class="feedback-item-actions">
+                            <a asp-page="/Feedback" asp-route-editId="@item.Id" class="feedback-edit">Edit</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" class="feedback-delete-form">
+                                <button type="submit" class="feedback-delete" aria-label="Delete feedback">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>
