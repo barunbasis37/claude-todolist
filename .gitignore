@@ -6,3 +6,4 @@ obj/
 .vs/
 .claude/settings.local.json
 .claude/user-prompt-log.txt
+site/

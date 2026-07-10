@@ -1,0 +1,41 @@
+site_name: TodoList Docs
+site_description: Documentation for the ASP.NET Core Razor Pages TodoList app
+repo_url: https://github.com/barunbasis37/claude-todolist
+repo_name: barunbasis37/claude-todolist
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - tables
+  - fenced_code
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - Data Model: data-model.md
+  - Pages & Routes: pages-and-routes.md
+  - Extending the App: extending.md
