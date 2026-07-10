@@ -35,6 +35,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - User Guide: user-guide.md
   - Architecture: architecture.md
   - Data Model: data-model.md
   - Pages & Routes: pages-and-routes.md

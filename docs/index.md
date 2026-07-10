@@ -12,6 +12,7 @@ A simple ASP.NET Core Razor Pages todo list app: add tasks, mark them complete, 
 ## Where to go next
 
 - [Getting Started](getting-started.md) — prerequisites, running the app locally
+- [User Guide](user-guide.md) — how to add, complete, and delete tasks in the app
 - [Architecture](architecture.md) — project structure, hosting model, key files
 - [Data Model](data-model.md) — the `TodoItem` entity
 - [Pages & Routes](pages-and-routes.md) — routes, handlers, purpose of each page
