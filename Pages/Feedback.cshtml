@@ -2,6 +2,7 @@
 @model FeedbackModel
 @{
     ViewData["Title"] = "Feedback";
+    ViewData["HideFeedbackFab"] = true;
     var isEditing = Model.EditingId.HasValue;
 }
 
@@ -15,11 +16,7 @@
         <div class="feedback-rating-row">
             <label for="Rating">Rating</label>
             <select asp-for="Rating" class="feedback-rating-select">
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Good</option>
-                <option value="3">3 - Average</option>
-                <option value="2">2 - Poor</option>
-                <option value="1">1 - Very Poor</option>
+                <partial name="_RatingOptions" />
             </select>
         </div>
 
@@ -44,9 +41,10 @@
             @foreach (var item in Model.Feedbacks)
             {
                 <li class="feedback-item">
+                    @{ var filledStars = Math.Clamp(item.Rating, 0, 5); }
                     <div class="feedback-item-header">
                         <span class="feedback-name">@item.Name</span>
-                        <span class="feedback-stars">@(new string('★', item.Rating))@(new string('☆', 5 - item.Rating))</span>
+                        <span class="feedback-stars">@(new string('★', filledStars))@(new string('☆', 5 - filledStars))</span>
                     </div>
                     <p class="feedback-message">@item.Message</p>
                     <div class="feedback-item-footer">

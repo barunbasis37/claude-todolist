@@ -24,6 +24,9 @@
                             <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Chat">Chat</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Feedback">Feedback</a>
                         </li>
                         <li class="nav-item">
@@ -45,6 +48,40 @@
             &copy; 2026 - TodoList - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
+
+    @{
+        var showFeedbackFab = ViewData["HideFeedbackFab"] as bool? != true;
+        var feedbackError = TempData["FeedbackError"] as string;
+    }
+    @if (showFeedbackFab)
+    {
+        <button type="button" id="feedbackFabBtn" class="feedback-fab" aria-label="Give feedback" aria-expanded="false" aria-controls="feedbackPopup">
+            <span class="feedback-fab-icon">💬</span>
+        </button>
+
+        <div id="feedbackPopup" class="feedback-popup" role="dialog" aria-modal="true" aria-labelledby="feedbackPopupTitle" aria-hidden="true" inert data-feedback-open="@(feedbackError != null ? "true" : null)">
+            <div class="feedback-popup-header">
+                <h2 id="feedbackPopupTitle">Send Feedback</h2>
+                <button type="button" id="feedbackPopupClose" class="feedback-popup-close" aria-label="Close">&times;</button>
+            </div>
+            @if (feedbackError != null)
+            {
+                <p class="feedback-popup-error" role="alert">@feedbackError</p>
+            }
+            <form method="post" asp-page="/Feedback" asp-page-handler="Add" class="feedback-popup-form">
+                <input type="hidden" name="@nameof(FeedbackModel.ReturnUrl)" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                <input type="text" name="@nameof(FeedbackModel.Name)" class="feedback-input" placeholder="Your name" autocomplete="off" required />
+                <textarea name="@nameof(FeedbackModel.Message)" class="feedback-textarea" placeholder="What's on your mind?" rows="3" required></textarea>
+                <div class="feedback-rating-row">
+                    <label for="feedbackPopupRating">Rating</label>
+                    <select id="feedbackPopupRating" name="@nameof(FeedbackModel.Rating)" class="feedback-rating-select">
+                        <partial name="_RatingOptions" />
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary feedback-popup-submit">Submit Feedback</button>
+            </form>
+        </div>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

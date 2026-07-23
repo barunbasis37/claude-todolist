@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,11 @@ public class FeedbackModel : PageModel
     public string? Message { get; set; }
 
     [BindProperty]
+    [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]
     public int Rating { get; set; } = 5;
+
+    [BindProperty]
+    public string? ReturnUrl { get; set; }
 
     public async Task OnGetAsync(int? editId)
     {
@@ -47,7 +52,7 @@ public class FeedbackModel : PageModel
 
     public async Task<IActionResult> OnPostAddAsync()
     {
-        if (!string.IsNullOrWhiteSpace(Name) && !string.IsNullOrWhiteSpace(Message))
+        if (ModelState.IsValid && !string.IsNullOrWhiteSpace(Name) && !string.IsNullOrWhiteSpace(Message))
         {
             _context.Feedbacks.Add(new Feedback
             {
@@ -57,14 +62,18 @@ public class FeedbackModel : PageModel
             });
             await _context.SaveChangesAsync();
         }
+        else
+        {
+            TempData["FeedbackError"] = "Please enter your name and a message.";
+        }
 
-        return RedirectToPage();
+        return RedirectToReturnUrl();
     }
 
     public async Task<IActionResult> OnPostUpdateAsync(int id)
     {
         var item = await _context.Feedbacks.FindAsync(id);
-        if (item is not null && !string.IsNullOrWhiteSpace(Name) && !string.IsNullOrWhiteSpace(Message))
+        if (item is not null && ModelState.IsValid && !string.IsNullOrWhiteSpace(Name) && !string.IsNullOrWhiteSpace(Message))
         {
             item.Name = Name.Trim();
             item.Message = Message.Trim();
@@ -92,5 +101,15 @@ public class FeedbackModel : PageModel
         Feedbacks = await _context.Feedbacks
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
+    }
+
+    private IActionResult RedirectToReturnUrl()
+    {
+        if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+        {
+            return LocalRedirect(ReturnUrl);
+        }
+
+        return RedirectToPage();
     }
 }
