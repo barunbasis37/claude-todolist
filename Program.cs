@@ -20,6 +20,7 @@ builder.Services.AddSingleton(new AnthropicClient());
 // Shared business logic behind the todo tools, used by both the in-app chat
 // tool and the MCP-exposed version of the same tool.
 builder.Services.AddScoped<TodoSearchService>();
+builder.Services.AddScoped<TodoMutationService>();
 
 // Chat tool registry: register each IChatTool implementation here (scoped,
 // since tools like SearchTodosTool depend on the scoped TodoContext). Adding
@@ -27,6 +28,7 @@ builder.Services.AddScoped<TodoSearchService>();
 // wiring it into the request and, once the catalog is large enough, into
 // server-side tool search automatically.
 builder.Services.AddScoped<IChatTool, SearchTodosTool>();
+builder.Services.AddScoped<IChatTool, AddTodoTool>();
 builder.Services.AddScoped<ChatToolCatalog>();
 
 // MCP server: exposes the same tools over the Model Context Protocol so
@@ -61,7 +63,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Exempt /mcp so MCP clients (e.g. the Claude Code CLI) can hit it over plain
+// HTTP on loopback without needing to trust the local ASP.NET Core dev cert —
+// several MCP clients validate TLS certs via their own bundled CA list rather
+// than the OS trust store, so `dotnet dev-certs https --trust` alone doesn't
+// help them. Fine for localhost-only traffic; revisit if this is ever exposed
+// beyond loopback.
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/mcp"),
+    branch => branch.UseHttpsRedirection());
 
 app.UseRouting();
 

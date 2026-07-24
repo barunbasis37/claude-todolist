@@ -47,5 +47,5 @@ public class TodoSearchService
     }
 
     private static string FormatTodo(TodoItem item) =>
-        $"- [{(item.IsComplete ? "x" : " ")}] {item.Title} (added {item.CreatedAt:MMM d, yyyy})";
+        $"- [{(item.IsComplete ? "x" : " ")}] #{item.Id} {item.Title} (added {item.CreatedAt:MMM d, yyyy})";
 }

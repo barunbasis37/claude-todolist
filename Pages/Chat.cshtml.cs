@@ -22,6 +22,8 @@ public class ChatModel : PageModel
         "Use the search_todos tool whenever the user asks about specific tasks, wants to check whether something " +
         "is on their list, references their todos by name or keyword, asks for a specific todo by number, or " +
         "asks for their first or last todo — never guess or invent todo items. " +
+        "Use the add_todo tool whenever the user asks to add, create, or note down a task — actually call the " +
+        "tool rather than just acknowledging it in text. " +
         "You may use light markdown (bold with **text**, bullet lists with '- ') when it makes a list of tasks easier to read.";
 
     // Common greetings/small-talk answered from a static FAQ instead of calling
