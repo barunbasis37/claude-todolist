@@ -404,6 +404,34 @@ body {
   font-style: italic;
 }
 
+.chat-message p {
+  margin: 0 0 0.4rem;
+}
+
+.chat-message p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-message ul {
+  margin: 0.2rem 0 0.4rem;
+  padding-left: 1.1rem;
+}
+
+.chat-message ul:last-child {
+  margin-bottom: 0;
+}
+
+.chat-message code {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0 0.25rem;
+  border-radius: 0.2rem;
+  font-size: 0.9em;
+}
+
+.chat-message-user code {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .chat-form {
   display: flex;
   gap: 0.5rem;
