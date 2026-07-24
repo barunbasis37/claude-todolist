@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TodoList.Chat;
 using TodoList.Chat.Tools;
 using TodoList.Data;
+using TodoList.Mcp;
+using TodoList.Services;
 
 LoadDotEnv();
 
@@ -15,6 +17,10 @@ builder.Services.AddDbContext<TodoContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("TodoContext") ?? "Data Source=todo.db"));
 builder.Services.AddSingleton(new AnthropicClient());
 
+// Shared business logic behind the todo tools, used by both the in-app chat
+// tool and the MCP-exposed version of the same tool.
+builder.Services.AddScoped<TodoSearchService>();
+
 // Chat tool registry: register each IChatTool implementation here (scoped,
 // since tools like SearchTodosTool depend on the scoped TodoContext). Adding
 // tool #2, #3, ... #200 is just another line here — ChatToolCatalog handles
@@ -22,6 +28,22 @@ builder.Services.AddSingleton(new AnthropicClient());
 // server-side tool search automatically.
 builder.Services.AddScoped<IChatTool, SearchTodosTool>();
 builder.Services.AddScoped<ChatToolCatalog>();
+
+// MCP server: exposes the same tools over the Model Context Protocol so
+// other MCP clients (Claude Desktop, Claude Code, etc.) can call them
+// remotely. Gated by a fixed API key (MCP_API_KEY — see .env) checked by
+// ApiKeyAuthenticationHandler; see app.MapMcp(...).RequireAuthorization()
+// below. Stateless transport since these tools don't need server-to-client
+// requests (sampling/elicitation) and it scales without session affinity.
+builder.Services
+    .AddAuthentication(ApiKeyAuthenticationDefaults.AuthenticationScheme)
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+        ApiKeyAuthenticationDefaults.AuthenticationScheme, options => { });
+builder.Services.AddAuthorization();
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport(options => options.Stateless = true)
+    .WithTools<TodoMcpTools>();
 
 var app = builder.Build();
 
@@ -43,11 +65,14 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapMcp("/mcp").RequireAuthorization();
 
 app.Run();
 

@@ -1,8 +1,6 @@
 using System.Text.Json;
 using Anthropic.Models.Messages;
-using Microsoft.EntityFrameworkCore;
-using TodoList.Data;
-using TodoList.Models;
+using TodoList.Services;
 
 namespace TodoList.Chat.Tools;
 
@@ -12,15 +10,16 @@ namespace TodoList.Chat.Tools;
 /// any future tool: implement <see cref="IChatTool"/>, register it in
 /// Program.cs, and <see cref="ChatToolCatalog"/> handles the rest
 /// (inclusion in the request, deferred loading once the catalog grows,
-/// logging).
+/// logging). The actual search logic lives in <see cref="TodoSearchService"/>,
+/// shared with the MCP-exposed version of this same tool.
 /// </summary>
 public class SearchTodosTool : IChatTool
 {
-    private readonly TodoContext _context;
+    private readonly TodoSearchService _search;
 
-    public SearchTodosTool(TodoContext context)
+    public SearchTodosTool(TodoSearchService search)
     {
-        _context = context;
+        _search = search;
     }
 
     public string Name => "search_todos";
@@ -73,31 +72,6 @@ public class SearchTodosTool : IChatTool
             ? positionElement.GetString()
             : null;
 
-        var candidates = await _context.TodoItems
-            .Where(t => includeCompleted || !t.IsComplete)
-            .OrderBy(t => t.CreatedAt)
-            .ToListAsync();
-
-        var matches = string.IsNullOrEmpty(query)
-            ? candidates
-            : candidates.Where(t => t.Title.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
-
-        if (position == "first" || position == "last")
-        {
-            var item = position == "first" ? matches.FirstOrDefault() : matches.LastOrDefault();
-            return item is null ? "No matching todo items found." : FormatTodo(item);
-        }
-
-        if (index is not null)
-        {
-            return index < 1 || index > matches.Count
-                ? $"No todo found at index {index}. There are {matches.Count} matching todo item(s)."
-                : FormatTodo(matches[index.Value - 1]);
-        }
-
-        return matches.Count == 0 ? "No matching todo items found." : string.Join("\n", matches.Select(FormatTodo));
+        return await _search.SearchAsync(query, includeCompleted, index, position);
     }
-
-    private static string FormatTodo(TodoItem item) =>
-        $"- [{(item.IsComplete ? "x" : " ")}] {item.Title} (added {item.CreatedAt:MMM d, yyyy})";
 }
